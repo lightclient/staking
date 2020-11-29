@@ -3,7 +3,7 @@
 # update hostname
 current_name=`cat /etc/hostname`
 read -p "Enter server full hostname ($current_name): " name
-sudo echo ${name:-$current_name} > /etc/hostname
+sudo sh -c "echo ${name:-$current_name} > /etc/hostname"
 
 # read in other variables
 read -p "Enter ssh port (default: 12221): " port
