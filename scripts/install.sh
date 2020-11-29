@@ -35,8 +35,6 @@ git clone https://github.com/lightclient/staking $HOME/.config/staking
 
 cd $HOME/.config/staking
 
-
-
 # install go-ethereum
 sudo useradd --no-create-home --shell /bin/false geth
 sudo mkdir -p /var/lib/geth
@@ -49,8 +47,8 @@ sudo systemctl enable geth
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
 
-git clone https://github.com/sigp/lighthouse
-make --directory lighthouse
+git clone https://github.com/sigp/lighthouse $HOME/lighthouse
+make --directory $HOME/lighthouse
 sudo cp $HOME/.cargo/bin/lighthouse /usr/local/bin
 
 # setup validator
@@ -138,11 +136,11 @@ sudo systemctl link $HOME/.config/staking/services/sachet.service
 
 if [ -n "$token" ]
 then
-	sed "s/token:.*$/token: $token/g" configs/sachet/config.yaml
+	sed "s/token:.*$/token: $token/g" $HOME/.config/staking/configs/sachet/config.yaml
 
 	if [ -n "$user" ]
 	then
-		sed "s/{{ TELEGRAM_USER_ID }}/$user/g" configs/sachet/config.yaml
+		sed "s/{{ TELEGRAM_USER_ID }}/$user/g" $HOME/.config/staking/configs/sachet/config.yaml
 	fi
 fi
 
@@ -163,7 +161,7 @@ sudo systemctl enable grafana-server
 
 # setup ssh
 port=${port:-12221}
-sed "s/Port.*$/Port $port/g" configs/ssh/sshd_config
+sed "s/Port.*$/Port $port/g" $HOME/.config/staking/configs/ssh/sshd_config
 sudo rm /etc/ssh/sshd_config
 sudo ln -s $HOME/.config/staking/configs/sshd_config /etc/ssh/sshd_config
 mkdir $HOME/.ssh
