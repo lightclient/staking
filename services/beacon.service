@@ -1,0 +1,25 @@
+[Unit]
+Description=Lighthouse Beacon Node
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=simple
+User=beacon
+Group=beacon
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/lighthouse bn \
+        --datadir /var/lib/lighthouse \
+        --network pyrmont \
+        --staking \
+        --disable-upnp \
+        --target-peers=100 \
+        --eth1-endpoint http://127.0.0.1:8545 \
+        --metrics \
+        --slasher-dir /var/lib/lighthouse/slasher \
+        --slasher \
+        --slasher-history-length 8192 \
+        --slasher-max-db-size 512 \
+        --debug-level debug
+[Install]
+WantedBy=multi-user.target

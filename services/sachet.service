@@ -1,0 +1,13 @@
+[Unit]
+Description=Alert message sender
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=simple
+User=sachet
+Group=sachet
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/sachet --config /etc/sachet/config.yaml
+[Install]
+WantedBy=multi-user.target

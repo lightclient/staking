@@ -1,0 +1,13 @@
+[Unit]
+Description=go-ethereum client
+After=network.target 
+Wants=network.target
+[Service]
+User=geth 
+Group=geth
+Type=simple
+Restart=always
+RestartSec=5
+ExecStart=geth --datadir /var/lib/geth --cache 8192 --http --goerli
+[Install]
+WantedBy=default.target

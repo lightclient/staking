@@ -1,0 +1,19 @@
+groups:
+- name: AllInstances
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    annotations:
+      title: 'Instance {{ $labels.instance }} down'
+      description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute.'
+    labels:
+      severity: 'critical'
+  - alert: LostConnectivity
+    expr: libp2p_peer_connected_peers_total < 5
+    for: 30s
+    annotations:
+      title: 'Instance {{ $labels.instance }} has less than 5 peers'
+      description: '{{ $labels.instance }} of job {{ $labels.job }} has had less than 5 peers for more than 30 seconds.'
+    labels:
+      severity: 'critical'

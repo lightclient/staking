@@ -1,0 +1,15 @@
+Include /etc/ssh/sshd_config.d/*.conf
+
+Port {{ SSH_PORT }}
+PermitRootLogin yes
+MaxAuthTries 3
+PubkeyAuthentication yes
+IgnoreRhosts yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+UsePAM no
+X11Forwarding no
+PrintMotd no
+AcceptEnv LANG LC_*
+Subsystem	sftp	/usr/lib/openssh/sftp-server

@@ -1,0 +1,12 @@
+providers:
+  telegram:
+    token: "{{ TELEGRAM TOKEN }}"
+
+templates:
+  - /etc/sachet/telegram.tmpl
+receivers:
+  - name: 'telegram'
+    provider: 'telegram'
+    to:
+      - '{{ TELEGRAM_USER_ID }}'
+    text: '{{ template "telegram_text" . }}'

@@ -1,0 +1,13 @@
+[Unit]
+Description=Lighthouse Validator
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=simple
+User=validator
+Group=validator
+Restart=always
+RestartSec=5
+ExecStart=/usr/local/bin/lighthouse vc --datadir /var/lib/lighthouse --network pyrmont --metrics
+[Install]
+WantedBy=multi-user.target
