@@ -1,41 +1,5 @@
 #!/bin/bash
 
-# set working directory to script home
-cd "$(dirname "${BASH_SOURCE[0]}")"
-
-# get ssh port and write to config
-read -p "Enter ssh port (default: 12221): " port
-port=${port:-12221}
-sed "s/Port.*$/Port $port/g" ..configs/ssh/sshd_config
-
-# get ssh
-read -p "Enter ssh public key to authorize access: " key
-if [ -z "$key" ]
-then
-	echo "You must enter a public key, otherwise you won't be able to access your server." 
-	exit 1
-fi
-
-read -p "Enter server full hostname (press enter to skip): " name
-if [ -n "$name" ]
-then
-	sudo echo $name > /etc/hostname
-fi
-
-read -p "Enter enter telegram bot token (press enter to skip): " token
-if [ -n "$token" ]
-then
-	sed "s/token:.*$/token: $token/g" ../configs/sachet/config.yaml
-fi
-
-read -p "Enter enter telegram user id (press enter to skip): " user
-if [ -n "$user" ]
-then
-	sed "s/{{ TELEGRAM_USER_ID }}/$user/g" ../configs/sachet/config.yaml
-fi
-
-cd $HOME
-
 sudo apt update && sudo apt upgrade
 sudo apt dist-upgrade && sudo apt autoremove
 
@@ -44,7 +8,45 @@ sudo add-apt-repository -y ppa:ethereum/ethereum
 sudo apt update
 sudo apt install -y geth git gcc g++ make cmake pkg-config libssl-dev
 
-git clone https://github.com/lightclient/staking .config/staking
+git clone https://github.com/lightclient/staking $HOME/.config/staking
+
+cd $HOME/.config/staking
+
+# update hostname
+name=`cat /etc/hostname`
+read -p "Enter server full hostname ($name): " name
+if [ -n "$name" ]
+then
+	sudo echo $name > /etc/hostname
+fi
+
+# get info for telegram bot
+read -p "Enter enter telegram bot token (press enter to skip): " token
+if [ -n "$token" ]
+then
+	sed "s/token:.*$/token: $token/g" configs/sachet/config.yaml
+
+	read -p "Enter enter telegram user id: " user
+	if [ -n "$user" ]
+	then
+		sed "s/{{ TELEGRAM_USER_ID }}/$user/g" configs/sachet/config.yaml
+	else
+		echo "Telegram alerting will be disabled until a user id is set."
+	fi
+fi
+
+# get ssh port and write to config
+read -p "Enter ssh port (default: 12221): " port
+port=${port:-12221}
+sed "s/Port.*$/Port $port/g" configs/ssh/sshd_config
+
+# get ssh public key
+read -p "Enter ssh public key to authorize access: " key
+if [ -z "$key" ]
+then
+	echo "You must enter a public key, otherwise you won't be able to access your server." 
+	exit 1
+fi
 
 # install go-ethereum
 sudo useradd --no-create-home --shell /bin/false geth
