@@ -18,6 +18,7 @@ if [ -n "$token" ]
 then
 	read -p "Enter enter telegram user id: " user
 	if [ -z "$user" ]
+	then
 		echo "Telegram alerting will be disabled until a user id is set."
 	fi
 fi
