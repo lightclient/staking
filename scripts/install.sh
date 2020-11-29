@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# update hostname
+current_name=`cat /etc/hostname`
+read -p "Enter server full hostname ($current_name): " name
+sudo echo ${name:-$current_name} > /etc/hostname
+
+# read in other variables
+read -p "Enter ssh port (default: 12221): " port
+read -p "Enter ssh public key to authorize access: " key
+if [ -z "$key" ]
+then
+	echo "You must enter a public key, otherwise you won't be able to access your server." 
+	exit 1
+fi
+read -p "Enter enter telegram bot token (press enter to skip): " token
+if [ -n "$token" ]
+then
+	read -p "Enter enter telegram user id: " user
+	if [ -z "$user" ]
+		echo "Telegram alerting will be disabled until a user id is set."
+	fi
+fi
+
 sudo apt update && sudo apt upgrade
 sudo apt dist-upgrade && sudo apt autoremove
 
@@ -12,41 +34,7 @@ git clone https://github.com/lightclient/staking $HOME/.config/staking
 
 cd $HOME/.config/staking
 
-# update hostname
-name=`cat /etc/hostname`
-read -p "Enter server full hostname ($name): " name
-if [ -n "$name" ]
-then
-	sudo echo $name > /etc/hostname
-fi
 
-# get info for telegram bot
-read -p "Enter enter telegram bot token (press enter to skip): " token
-if [ -n "$token" ]
-then
-	sed "s/token:.*$/token: $token/g" configs/sachet/config.yaml
-
-	read -p "Enter enter telegram user id: " user
-	if [ -n "$user" ]
-	then
-		sed "s/{{ TELEGRAM_USER_ID }}/$user/g" configs/sachet/config.yaml
-	else
-		echo "Telegram alerting will be disabled until a user id is set."
-	fi
-fi
-
-# get ssh port and write to config
-read -p "Enter ssh port (default: 12221): " port
-port=${port:-12221}
-sed "s/Port.*$/Port $port/g" configs/ssh/sshd_config
-
-# get ssh public key
-read -p "Enter ssh public key to authorize access: " key
-if [ -z "$key" ]
-then
-	echo "You must enter a public key, otherwise you won't be able to access your server." 
-	exit 1
-fi
 
 # install go-ethereum
 sudo useradd --no-create-home --shell /bin/false geth
@@ -147,6 +135,16 @@ sudo chown -R sachet:sachet /usr/local/bin/sachet
 rm -rf sachet-0.2.3.linux-amd64.tar.gz sachet-0.2.3.linux-amd64
 sudo systemctl link $HOME/.config/staking/services/sachet.service
 
+if [ -n "$token" ]
+then
+	sed "s/token:.*$/token: $token/g" configs/sachet/config.yaml
+
+	if [ -n "$user" ]
+	then
+		sed "s/{{ TELEGRAM_USER_ID }}/$user/g" configs/sachet/config.yaml
+	fi
+fi
+
 if [ -n "$token" && -n "$user" ]
 then
 	sudo systemctl start sachet
@@ -163,6 +161,8 @@ sudo systemctl start grafana-server
 sudo systemctl enable grafana-server
 
 # setup ssh
+port=${port:-12221}
+sed "s/Port.*$/Port $port/g" configs/ssh/sshd_config
 sudo rm /etc/ssh/sshd_config
 sudo ln -s $HOME/.config/staking/configs/sshd_config /etc/ssh/sshd_config
 mkdir $HOME/.ssh
